@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Carbide — every listing, plus what they actually sold for</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root{
+  --ground:#eceef0; --surface:#fff; --surface-2:#f4f6f7; --surface-3:#e6e9eb;
+  --ink:#14161a; --ink-2:#5b6068; --ink-3:#878d95;
+  --line:#d4d8dc; --line-2:#bdc3c9;
+  --accent:#0b6b52; --accent-ink:#08553f; --accent-soft:rgba(11,107,82,.10);
+  --hot:#c8102e;
+  --f-d:"Archivo",system-ui,sans-serif; --f-b:"IBM Plex Sans",system-ui,sans-serif;
+  --f-m:"IBM Plex Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){:root{
+  --ground:#0d0f11; --surface:#16191c; --surface-2:#1d2125; --surface-3:#262b30;
+  --ink:#e9ebee; --ink-2:#969ca5; --ink-3:#6e757e;
+  --line:#292e34; --line-2:#394047;
+  --accent:#3fbf95; --accent-ink:#5fd3ac; --accent-soft:rgba(63,191,149,.14);
+  --hot:#ef4257;
+}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font:14px/1.5 var(--f-b);-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+.mono{font-family:var(--f-m);font-variant-numeric:tabular-nums}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+header{background:var(--surface);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
+header::after{content:"";display:block;height:2px;background:var(--accent)}
+.hin{max-width:1400px;margin:0 auto;padding:12px 20px;display:flex;align-items:center;gap:22px;flex-wrap:wrap}
+.logo{font-family:var(--f-d);font-weight:700;font-size:19px;letter-spacing:-.02em}
+.logo span{color:var(--accent)}
+.tag{color:var(--ink-2);font-size:12.5px;flex:1;min-width:200px}
+.hstat{display:flex;gap:20px}
+.hstat div{display:flex;flex-direction:column}
+.hstat b{font-family:var(--f-m);font-size:15px;font-weight:600}
+.hstat span{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+
+.wrap{max-width:1400px;margin:0 auto;padding:18px 20px 60px;display:grid;grid-template-columns:238px minmax(0,1fr);gap:18px;align-items:start}
+@media (max-width:940px){.wrap{grid-template-columns:1fr}}
+
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:4px}
+.phd{padding:10px 13px;border-bottom:1px solid var(--line);font-weight:600;font-size:12.5px;
+  display:flex;justify-content:space-between;align-items:center;gap:10px}
+aside{position:sticky;top:76px}
+.fbody{padding:13px}
+.fg{margin-bottom:14px}
+.fg label{display:block;font-size:10px;letter-spacing:.11em;text-transform:uppercase;color:var(--ink-3);margin-bottom:5px}
+select,input[type=text],input[type=number]{
+  width:100%;background:var(--surface-2);border:1px solid var(--line);color:var(--ink);
+  border-radius:3px;padding:7px 8px;font:13px var(--f-b)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.tg{display:flex;align-items:flex-start;gap:7px;font-size:12.5px;color:var(--ink-2);cursor:pointer;margin-bottom:9px;line-height:1.35}
+.tg input{accent-color:var(--accent);margin:1px 0 0;width:15px;height:15px;flex:none}
+.btn{width:100%;background:var(--accent);color:#fff;border:none;border-radius:3px;padding:9px;font:600 13px var(--f-b);cursor:pointer}
+.btn:hover{filter:brightness(1.08)}
+.btn.ghost{background:none;color:var(--ink-2);border:1px solid var(--line)}
+
+.tabs{display:flex;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:4px;overflow:hidden;flex-wrap:wrap;margin-bottom:14px}
+.tab{background:var(--surface);padding:8px 12px;font-size:12.5px;cursor:pointer;color:var(--ink-2);border:none;font-family:var(--f-b);flex:1;min-width:88px}
+.tab b{display:block;font-family:var(--f-m);font-size:14px;color:var(--ink);font-weight:600}
+.tab.on{background:var(--accent-soft);color:var(--accent-ink)}
+.tab.on b{color:var(--accent-ink)}
+
+/* the differentiator */
+.comps{border:1px solid var(--accent);border-radius:4px;background:var(--accent-soft);padding:12px 14px;margin-bottom:14px}
+.comps h3{margin:0 0 3px;font-family:var(--f-d);font-size:13.5px}
+.comps p{margin:0 0 9px;font-size:12.5px;color:var(--ink-2)}
+.cnums{display:flex;gap:22px;flex-wrap:wrap;margin-bottom:9px}
+.cnums div{display:flex;flex-direction:column}
+.cnums b{font-family:var(--f-m);font-size:17px;font-weight:600}
+.cnums span{font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3)}
+.clist{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-family:var(--f-m);font-size:11px;background:var(--surface);border:1px solid var(--line);
+  border-radius:3px;padding:3px 6px;color:var(--ink-2);white-space:nowrap}
+.chip b{color:var(--ink)}
+
+.res{display:flex;flex-direction:column;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.card{background:var(--surface);padding:11px 13px;display:grid;grid-template-columns:1fr auto;gap:3px 16px}
+.card:hover{background:var(--surface-2)}
+.ct{font-weight:600;font-size:14px;grid-column:1}
+.cm{grid-column:1;font-family:var(--f-m);font-size:12.5px;color:var(--ink-2)}
+.cl{grid-column:1;font-size:12px;color:var(--ink-3)}
+.cr{grid-column:2;grid-row:1/span 3;text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:5px}
+.price{font-family:var(--f-m);font-size:17px;font-weight:600;letter-spacing:-.02em}
+.badges{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}
+.b{font:600 9.5px/1 var(--f-m);letter-spacing:.07em;text-transform:uppercase;padding:3px 5px;border-radius:2px;border:1px solid var(--line-2);color:var(--ink-2);white-space:nowrap}
+.b.great{border-color:var(--accent);color:var(--accent-ink);background:var(--accent-soft)}
+.b.good{border-color:var(--accent);color:var(--accent-ink)}
+.b.high{border-color:var(--line-2);color:var(--ink-3)}
+.b.warn{border-color:var(--hot);color:var(--hot)}
+.b.src{border-style:dashed}
+.view{font:600 11px var(--f-b);border:1px solid var(--line-2);border-radius:3px;padding:5px 9px;color:var(--ink)}
+.view:hover{border-color:var(--accent);color:var(--accent-ink)}
+.empty{padding:50px 20px;text-align:center;color:var(--ink-2)}
+.more{padding:13px;text-align:center}
+.note{color:var(--ink-3);font-size:11.5px;margin-top:12px;line-height:1.6}
+.bar{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-bottom:11px;flex-wrap:wrap}
+.bar h2{font-family:var(--f-d);font-size:16px;margin:0;font-weight:600}
+.bar .sub{color:var(--ink-2);font-size:12.5px}
+</style>
+</head>
+<body>
+<header>
+  <div class="hin">
+    <div class="logo">CAR<span>BIDE</span></div>
+    <div class="tag">Every listing, plus what comparable cars <em>actually sold for</em>. The number no other aggregator shows you.</div>
+    <div class="hstat">
+      <div><b id="s-total">0</b><span>listings</span></div>
+      <div><b id="s-src">0</b><span>sources</span></div>
+      <div><b id="s-sold">0</b><span>sold comps</span></div>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <aside>
+    <div class="panel">
+      <div class="phd">Refine <button class="btn ghost" id="reset" style="width:auto;padding:4px 8px;font-size:11px">Reset</button></div>
+      <div class="fbody">
+        <div class="fg"><label for="f-make">Make</label><select id="f-make"></select></div>
+        <div class="fg"><label for="f-model">Model</label><select id="f-model"></select></div>
+        <div class="fg"><label for="f-text">Keyword</label><input type="text" id="f-text" placeholder="GTS, Spyder, city…"></div>
+        <div class="fg"><label>Year</label><div class="row2">
+          <input type="number" id="f-miny" placeholder="from" min="1990" max="2027">
+          <input type="number" id="f-maxy" placeholder="to" min="1990" max="2027"></div></div>
+        <div class="fg"><label>Price</label><div class="row2">
+          <input type="number" id="f-minp" placeholder="min">
+          <input type="number" id="f-maxp" placeholder="max"></div></div>
+        <div class="fg"><label for="f-miles">Max mileage</label><input type="number" id="f-miles" placeholder="any"></div>
+        <div class="fg"><label for="f-sort">Sort</label><select id="f-sort">
+          <option value="price">Lowest price</option>
+          <option value="miles">Lowest mileage</option>
+          <option value="year">Newest year</option>
+        </select></div>
+        <label class="tg"><input type="checkbox" id="f-undom"> <span><b>Undominated only</b> — hide cars beaten on year, mileage and price at once</span></label>
+        <label class="tg"><input type="checkbox" id="f-out" checked> <span>Hide suspected salvage (price far below its cohort)</span></label>
+        <label class="tg"><input type="checkbox" id="f-auc"> <span>Hide auctions (bids, not asking prices)</span></label>
+        <button class="btn" id="go">Search</button>
+      </div>
+    </div>
+    <p class="note">Sources are aggregated directly, not linked out to. Sold prices come from completed auctions, so they are transactions rather than asks.</p>
+  </aside>
+
+  <main>
+    <div class="bar">
+      <div><h2 id="hd">All listings</h2><div class="sub" id="sub">loading…</div></div>
+    </div>
+    <div class="tabs" id="tabs"></div>
+    <div id="comps"></div>
+    <div class="res" id="res"></div>
+    <div class="more"><button class="btn ghost" id="more" style="width:auto;padding:8px 18px" hidden>Show more</button></div>
+  </main>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+const usd = n => '$' + Number(n).toLocaleString('en-US');
+const num = n => Number(n).toLocaleString('en-US');
+let state = { limit: 60, src: '' };
+
+async function facets(){
+  const f = await (await fetch('/api/facets')).json();
+  $('#s-total').textContent = num(f.total);
+  $('#s-src').textContent = Object.keys(f.sources).length;
+  $('#s-sold').textContent = num(f.soldTotal);
+  const fill = (el, obj, label) => {
+    el.innerHTML = `<option value="">${label}</option>` + Object.entries(obj)
+      .sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<option value="${k}">${k} (${v})</option>`).join('');
+  };
+  fill($('#f-make'), f.makes, 'Any make');
+  fill($('#f-model'), f.models, 'Any model');
+}
+
+function params(){
+  const p = new URLSearchParams();
+  const set=(k,v)=>{ if(v!=='' && v!=null) p.set(k,v); };
+  set('make',$('#f-make').value); set('model',$('#f-model').value); set('text',$('#f-text').value.trim());
+  set('minYear',$('#f-miny').value); set('maxYear',$('#f-maxy').value);
+  set('minPrice',$('#f-minp').value); set('maxPrice',$('#f-maxp').value);
+  set('maxMiles',$('#f-miles').value); set('sort',$('#f-sort').value);
+  if($('#f-undom').checked) p.set('undominated','1');
+  if($('#f-out').checked)   p.set('hideOutliers','1');
+  if($('#f-auc').checked)   p.set('hideAuctions','1');
+  if(state.src) p.set('src', state.src);
+  p.set('limit', state.limit);
+  return p;
+}
+
+function dealBadge(c){
+  if(!c.deal || c.deal==='fair') return '';
+  const t = c.deal==='great' ? 'Great deal' : c.deal==='good' ? 'Good deal' : 'Above market';
+  return `<span class="b ${c.deal}" title="${c.vsCohort}% vs same model and year band">${t}</span>`;
+}
+
+function render(d){
+  $('#sub').textContent =
+    `${num(d.total)} matches · ${d.undominatedCount} undominated · ${Object.keys(d.bySource).length} sources`;
+
+  const tot = Object.values(d.bySource).reduce((a,b)=>a+b,0);
+  $('#tabs').innerHTML =
+    `<button class="tab ${state.src===''?'on':''}" data-s=""><b>${num(tot)}</b>All sources</button>` +
+    Object.entries(d.bySource).sort((a,b)=>b[1]-a[1]).map(([k,v])=>
+      `<button class="tab ${state.src===k?'on':''}" data-s="${k}"><b>${num(v)}</b>${k}</button>`).join('');
+  $('#tabs').querySelectorAll('.tab').forEach(b=>b.onclick=()=>{state.src=b.dataset.s;state.limit=60;load();});
+
+  // sold comps: the panel no other aggregator has
+  const c = d.comps;
+  $('#comps').innerHTML = !c ? '' : `
+    <div class="comps">
+      <h3>What these actually sell for</h3>
+      <p>${c.n} completed auction sales. Asking prices are what sellers want; these are what buyers paid.</p>
+      <div class="cnums">
+        <div><b>${usd(c.median)}</b><span>median sold</span></div>
+        <div><b>${usd(c.low)}</b><span>lowest</span></div>
+        <div><b>${usd(c.high)}</b><span>highest</span></div>
+      </div>
+      <div class="clist">${c.recent.map(s=>
+        `<a class="chip" href="${s.url}" target="_blank" rel="noopener"><b>${usd(s.price)}</b> · ${s.date} · ${s.title.slice(0,34)}</a>`).join('')}</div>
+    </div>`;
+
+  $('#res').innerHTML = d.results.length ? d.results.map(c=>`
+    <div class="card">
+      <div class="ct">${c.title}</div>
+      <div class="cm">${num(c.miles)} mi${c.cohortMedian?` · cohort median ${usd(c.cohortMedian)}`:''}</div>
+      <div class="cl">${c.loc || 'location not listed'}</div>
+      <div class="cr">
+        <div class="price">${usd(c.price)}</div>
+        <div class="badges">
+          ${dealBadge(c)}
+          ${c.auction?'<span class="b warn">Bid, not ask</span>':''}
+          ${c.outlier?'<span class="b warn">Verify title</span>':''}
+          <span class="b src">${c.src}${c.alsoOn && c.alsoOn.length ? ` +${c.alsoOn.length} sites` : ''}</span>
+        </div>
+        <a class="view" href="${c.url}" target="_blank" rel="noopener">View listing</a>
+      </div>
+    </div>`).join('') : `<div class="empty"><b>Nothing matches.</b><br>Widen the price or year range.</div>`;
+
+  $('#more').hidden = d.results.length >= d.total;
+}
+
+async function load(){
+  const d = await (await fetch('/api/search?' + params())).json();
+  render(d);
+}
+$('#go').onclick = ()=>{ state.limit=60; load(); };
+$('#more').onclick = ()=>{ state.limit += 60; load(); };
+$('#reset').onclick = ()=>{
+  ['f-text','f-miny','f-maxy','f-minp','f-maxp','f-miles'].forEach(i=>$('#'+i).value='');
+  $('#f-make').value=''; $('#f-model').value=''; $('#f-sort').value='price';
+  $('#f-undom').checked=false; $('#f-out').checked=true; $('#f-auc').checked=false;
+  state={limit:60,src:''}; load();
+};
+['f-make','f-model','f-sort'].forEach(i=>$('#'+i).onchange=()=>{state.limit=60;load();});
+$('#f-text').addEventListener('keydown',e=>{ if(e.key==='Enter'){state.limit=60;load();} });
+['f-undom','f-out','f-auc'].forEach(i=>$('#'+i).onchange=()=>{state.limit=60;load();});
+
+facets().then(load);
+</script>
+</body>
+</html>
