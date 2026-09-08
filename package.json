@@ -4,10 +4,14 @@
   "private": true,
   "description": "Car listing aggregator with sold-price comparables. Zero runtime dependencies.",
   "type": "module",
-  "engines": { "node": ">=18" },
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "start": "node server.mjs",
-    "probe": "node scraper/probe.mjs"
+    "probe": "node scraper/probe.mjs",
+    "build": "node build.mjs",
+    "preview": "node build.mjs && npx --yes serve dist -l 4200"
   },
   "license": "MIT"
 }

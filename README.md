@@ -1,10 +1,12 @@
 # Carbide: a working car aggregator prototype
 
 ```bash
-cd scratch/site && node server.mjs      # http://localhost:4173
+npm start          # dev server on http://localhost:4173
+npm run build      # static site into dist/, deployable anywhere
 ```
 
-Zero dependencies. Node 18+. Data ships in `data/`.
+Zero dependencies and no bundler. Node 18+ for the dev server; the built site
+needs no server at all.
 
 **2,118 listings across 10 sources, deduped to 2,086 unique cars, plus 169 verified sold records.**
 
