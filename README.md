@@ -67,6 +67,29 @@ boot, so search is a filter over memory.
   shortlist is the Pareto frontier: cars nothing else beats on all three.
 - **Auctions segregated.** Cars & Bids rows are live bids, labelled *Bid, not ask*, and excludable.
 
+## The two halves
+
+A header switch moves between them, and the sidebar adapts rather than showing dead controls.
+
+**For sale** is the AutoTempest half: 10 aggregated sources, cross-source dedupe, cohort deal
+rating, salvage flag, undominated filter.
+
+**Sold at auction** is the BringATrailer half: browse every completed sale with its own filters and
+sorts, above a chart of the median sale price per month. The i8 archive draws a real 34-month curve
+from Feb 2020 to Apr 2026.
+
+Two decisions that keep that chart honest:
+
+- **Months with no sale are skipped, not interpolated,** and the x axis is real time rather than
+  evenly spaced samples. Spacing the points evenly would invent a steady cadence that does not
+  exist and would distort every slope on the chart.
+- **Each point is a monthly median, not a single sale,** and hovering gives the count behind it.
+  A month with one sale and a month with nine look identical otherwise.
+
+Mileage is missing on 115 of the 169 sold records. BaT encodes it in the listing title
+(`16k-Mile 2019 BMW i8`), so parsing that lifts coverage to 60% on the i8, and the UI states the
+coverage instead of implying the median is mileage-adjusted.
+
 ---
 
 ## Getting more data in
@@ -123,6 +146,12 @@ Every one produced *plausible-looking wrong data*, which is far worse than an er
   raw label, and three others were mislabeled outright. Resolve the source from the destination
   URL host instead; the sitecode is a fallback. This corrected the source counts and revealed
   PrivateAuto and Sotheby's Motorsport, which had been hiding under wrong labels.
+- A class selector outranks the user-agent `[hidden]` rule. `.tg{display:flex}` meant
+  `el.hidden = true` did nothing, and the controls stayed visible. Restate `display:none` at
+  class specificity.
+- `preserveAspectRatio="none"` scales x and y by different factors, so every `<circle>` renders
+  as an oval. Put the intended aspect ratio in the viewBox and let it scale uniformly.
+- Sale dates are `MM/DD/YYYY`, which sorts wrong as a string. Bucket on `YYYY-MM`.
 - **After any extractor change, assert distinct-price count is near record count.** `19 records,
   1 distinct price` is the signature of a mispairing bug and is otherwise invisible.
 
