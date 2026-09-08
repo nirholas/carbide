@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Carbide — every listing, plus what they actually sold for</title>
+<title>Carbide: every listing, plus what they actually sold for</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
@@ -57,6 +57,9 @@ select,input[type=text],input[type=number]{
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:7px}
 .tg{display:flex;align-items:flex-start;gap:7px;font-size:12.5px;color:var(--ink-2);cursor:pointer;margin-bottom:9px;line-height:1.35}
 .tg input{accent-color:var(--accent);margin:1px 0 0;width:15px;height:15px;flex:none}
+/* a class selector outranks the UA [hidden] rule, so display:flex/block would
+   keep these visible after el.hidden = true. Restate it at class specificity. */
+.tg[hidden],.fg[hidden]{display:none}
 .btn{width:100%;background:var(--accent);color:#fff;border:none;border-radius:3px;padding:9px;font:600 13px var(--f-b);cursor:pointer}
 .btn:hover{filter:brightness(1.08)}
 .btn.ghost{background:none;color:var(--ink-2);border:1px solid var(--line)}
@@ -79,6 +82,26 @@ select,input[type=text],input[type=number]{
 .chip{font-family:var(--f-m);font-size:11px;background:var(--surface);border:1px solid var(--line);
   border-radius:3px;padding:3px 6px;color:var(--ink-2);white-space:nowrap}
 .chip b{color:var(--ink)}
+
+/* mode switch: for-sale vs sold archive */
+.modes{display:flex;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:4px;overflow:hidden;margin-bottom:14px}
+.mode{flex:1;background:var(--surface);border:none;cursor:pointer;padding:9px 12px;font:600 13px var(--f-b);color:var(--ink-2);
+  display:flex;align-items:baseline;justify-content:center;gap:7px}
+.mode:hover{background:var(--surface-2)}
+.mode.on{background:var(--accent);color:#fff}
+.mode i{font:400 11px var(--f-m);font-style:normal;opacity:.72}
+
+/* auction price history */
+.trend{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:12px 14px;margin-bottom:14px}
+.trend h3{margin:0 0 2px;font-family:var(--f-d);font-size:13.5px}
+.trend p{margin:0 0 10px;font-size:12.5px;color:var(--ink-2)}
+.trend svg{display:block;width:100%;height:auto;overflow:visible}
+.trend .ln{fill:none;stroke:var(--accent);stroke-width:1.75;stroke-linejoin:round;stroke-linecap:round}
+.trend .ar{fill:var(--accent-soft);stroke:none}
+.trend .dt{fill:var(--accent);stroke:var(--surface);stroke-width:1.5}
+.trend .gl{stroke:var(--line);stroke-width:1;stroke-dasharray:2 3}
+.trend .ax{fill:var(--ink-3);font:10px var(--f-m)}
+.taxis{display:flex;justify-content:space-between;font:10px var(--f-m);color:var(--ink-3);margin-top:5px}
 
 .res{display:flex;flex-direction:column;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:4px;overflow:hidden}
 .card{background:var(--surface);padding:11px 13px;display:grid;grid-template-columns:1fr auto;gap:3px 16px}
@@ -138,7 +161,7 @@ select,input[type=text],input[type=number]{
           <option value="miles">Lowest mileage</option>
           <option value="year">Newest year</option>
         </select></div>
-        <label class="tg"><input type="checkbox" id="f-undom"> <span><b>Undominated only</b> — hide cars beaten on year, mileage and price at once</span></label>
+        <label class="tg"><input type="checkbox" id="f-undom"> <span><b>Undominated only</b>: hide cars beaten on year, mileage and price at once</span></label>
         <label class="tg"><input type="checkbox" id="f-out" checked> <span>Hide suspected salvage (price far below its cohort)</span></label>
         <label class="tg"><input type="checkbox" id="f-auc"> <span>Hide auctions (bids, not asking prices)</span></label>
         <button class="btn" id="go">Search</button>
@@ -151,7 +174,12 @@ select,input[type=text],input[type=number]{
     <div class="bar">
       <div><h2 id="hd">All listings</h2><div class="sub" id="sub">loading…</div></div>
     </div>
+    <div class="modes" id="modes">
+      <button class="mode on" data-m="live">For sale <i id="m-live">0</i></button>
+      <button class="mode" data-m="sold">Sold at auction <i id="m-sold">0</i></button>
+    </div>
     <div class="tabs" id="tabs"></div>
+    <div id="trend"></div>
     <div id="comps"></div>
     <div class="res" id="res"></div>
     <div class="more"><button class="btn ghost" id="more" style="width:auto;padding:8px 18px" hidden>Show more</button></div>
@@ -162,13 +190,14 @@ select,input[type=text],input[type=number]{
 const $ = s => document.querySelector(s);
 const usd = n => '$' + Number(n).toLocaleString('en-US');
 const num = n => Number(n).toLocaleString('en-US');
-let state = { limit: 60, src: '' };
+let state = { limit: 60, src: '', mode: 'live' };
 
 async function facets(){
   const f = await (await fetch('/api/facets')).json();
   $('#s-total').textContent = num(f.total);
   $('#s-src').textContent = Object.keys(f.sources).length;
   $('#s-sold').textContent = num(f.soldTotal);
+  $('#m-live').textContent = num(f.total);
   const fill = (el, obj, label) => {
     el.innerHTML = `<option value="">${label}</option>` + Object.entries(obj)
       .sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<option value="${k}">${k} (${v})</option>`).join('');
@@ -198,7 +227,83 @@ function dealBadge(c){
   return `<span class="b ${c.deal}" title="${c.vsCohort}% vs same model and year band">${t}</span>`;
 }
 
+function soldParams(){
+  const p = new URLSearchParams();
+  const set=(k,v)=>{ if(v!=='' && v!=null) p.set(k,v); };
+  set('model',$('#f-model').value); set('text',$('#f-text').value.trim());
+  set('minYear',$('#f-miny').value); set('maxYear',$('#f-maxy').value);
+  set('minPrice',$('#f-minp').value); set('maxPrice',$('#f-maxp').value);
+  set('maxMiles',$('#f-miles').value);
+  const s=$('#f-sort').value;
+  p.set('sort', s==='price'?'price' : s==='miles'?'miles' : s==='year'?'year' : 'date');
+  p.set('limit', state.limit);
+  return p;
+}
+
+// Plot on a real time axis, not on evenly spaced samples. The archive has gaps
+// (some months have no sale at all) and spacing them evenly would invent a
+// steady cadence that does not exist and distort every slope on the chart.
+function chart(trend){
+  if(trend.length < 2) return '';
+  const mi = s => { const [y,m] = s.split('-').map(Number); return y*12 + m; };
+  const xs = trend.map(t=>mi(t.month)), ys = trend.map(t=>t.median);
+  const x0=Math.min(...xs), x1=Math.max(...xs), y0=Math.min(...ys), y1=Math.max(...ys);
+  // Uniform scaling only. preserveAspectRatio="none" stretches x and y by
+  // different factors, which turns every data dot into an oval, so the viewBox
+  // carries the intended aspect ratio and the SVG scales proportionally.
+  const W=1000, H=150, padY=16, padX=6;
+  const px = v => x1===x0 ? W/2 : padX + ((v-x0)/(x1-x0))*(W-padX*2);
+  const py = v => y1===y0 ? H/2 : H-padY - ((v-y0)/(y1-y0))*(H-padY*2);
+  const pts = trend.map((t,i)=>[px(xs[i]), py(ys[i])]);
+  const line = pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ');
+  const area = line + ` L${W-padX} ${H} L${padX} ${H} Z`;
+  const fmt = s => { const [y,m]=s.split('-'); return ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][+m-1]+" '"+y.slice(2); };
+  return `
+    <svg viewBox="0 0 ${W} ${H}" role="img"
+         aria-label="Median sold price per month from ${fmt(trend[0].month)} to ${fmt(trend[trend.length-1].month)}, ranging ${usd(y0)} to ${usd(y1)}">
+      <line class="gl" x1="0" y1="${py(y1).toFixed(1)}" x2="${W}" y2="${py(y1).toFixed(1)}"/>
+      <line class="gl" x1="0" y1="${py(y0).toFixed(1)}" x2="${W}" y2="${py(y0).toFixed(1)}"/>
+      <text class="ax" x="0" y="${(py(y1)-5).toFixed(1)}">${usd(y1)}</text>
+      <text class="ax" x="0" y="${(py(y0)+12).toFixed(1)}">${usd(y0)}</text>
+      <path class="ar" d="${area}"/><path class="ln" d="${line}"/>
+      ${pts.map((pt,i)=>`<circle class="dt" cx="${pt[0].toFixed(1)}" cy="${pt[1].toFixed(1)}" r="3.4"
+        ><title>${fmt(trend[i].month)}: ${usd(trend[i].median)} (${trend[i].n} sale${trend[i].n>1?'s':''})</title></circle>`).join('')}
+    </svg>
+    <div class="taxis"><span>${fmt(trend[0].month)}</span><span>${trend.length} months with a recorded sale</span><span>${fmt(trend[trend.length-1].month)}</span></div>`;
+}
+
+function renderSold(d){
+  $('#hd').textContent = ($('#f-model').value || 'All') + ' auction results';
+  $('#sub').textContent = `${num(d.total)} completed sales · median ${usd(d.median)} · mileage known on ${d.milesCoverage}%`;
+  $('#tabs').innerHTML = '';
+  $('#comps').innerHTML = '';
+
+  const c = chart(d.trend);
+  $('#trend').innerHTML = !c ? '' : `
+    <div class="trend">
+      <h3>What the market actually paid, over time</h3>
+      <p>Each point is the median of that month's sales across ${num(d.total)} completed auctions. Months with no sale are skipped, not interpolated. Hover a point for its count.</p>
+      ${c}
+    </div>`;
+
+  $('#res').innerHTML = d.results.length ? d.results.map(s=>`
+    <div class="card">
+      <div class="ct">${s.title}</div>
+      <div class="cm">${s.miles?num(s.miles)+' mi':'mileage not stated'}${s.year?` · ${s.year}`:''}</div>
+      <div class="cl">Sold ${s.date} on BringATrailer</div>
+      <div class="cr">
+        <div class="price">${usd(s.price)}</div>
+        <div class="badges"><span class="b good">Sold</span><span class="b src">${s.line}</span></div>
+        <a class="view" href="${s.url}" target="_blank" rel="noopener">View auction</a>
+      </div>
+    </div>`).join('') : `<div class="empty"><b>No sales match.</b><br>The archive covers 7 model lines. Widen the year or price range.</div>`;
+
+  $('#more').hidden = d.results.length >= d.total;
+}
+
 function render(d){
+  $('#trend').innerHTML = '';
+  $('#hd').textContent = 'All listings';
   $('#sub').textContent =
     `${num(d.total)} matches · ${d.undominatedCount} undominated · ${Object.keys(d.bySource).length} sources`;
 
@@ -244,9 +349,30 @@ function render(d){
   $('#more').hidden = d.results.length >= d.total;
 }
 
+// Three sidebar toggles only mean something for live listings: an auction that
+// already closed cannot be a salvage-priced ask or a live bid, so hiding them in
+// sold mode is honest rather than cosmetic.
+const LIVE_ONLY = ['f-undom','f-out','f-auc'];
+function syncMode(){
+  const sold = state.mode === 'sold';
+  document.querySelectorAll('#modes .mode').forEach(b=>b.classList.toggle('on', b.dataset.m===state.mode));
+  LIVE_ONLY.forEach(i=>{ const el=$('#'+i); if(el) el.closest('.tg').hidden = sold; });
+  $('#f-make').closest('.fg').hidden = sold;   // the archive is one make per line
+  const s = $('#f-sort');
+  s.querySelector('option[value="price"]').textContent = sold ? 'Lowest sale price' : 'Lowest price';
+  if(!s.querySelector('option[value="date"]')){
+    s.insertAdjacentHTML('afterbegin','<option value="date">Most recent sale</option>');
+  }
+  s.querySelector('option[value="date"]').hidden = !sold;
+  if(sold && !['price','miles','year','date'].includes(s.value)) s.value='date';
+}
+
 async function load(){
-  const d = await (await fetch('/api/search?' + params())).json();
-  render(d);
+  syncMode();
+  if(state.mode === 'sold'){
+    return renderSold(await (await fetch('/api/sold?' + soldParams())).json());
+  }
+  render(await (await fetch('/api/search?' + params())).json());
 }
 $('#go').onclick = ()=>{ state.limit=60; load(); };
 $('#more').onclick = ()=>{ state.limit += 60; load(); };
@@ -260,7 +386,17 @@ $('#reset').onclick = ()=>{
 $('#f-text').addEventListener('keydown',e=>{ if(e.key==='Enter'){state.limit=60;load();} });
 ['f-undom','f-out','f-auc'].forEach(i=>$('#'+i).onchange=()=>{state.limit=60;load();});
 
-facets().then(load);
+document.querySelectorAll('#modes .mode').forEach(b=>b.onclick=()=>{
+  if(state.mode===b.dataset.m) return;
+  state.mode=b.dataset.m; state.limit=60; state.src='';
+  if(state.mode==='sold') $('#f-sort').value='date';
+  load();
+});
+
+Promise.all([facets(), fetch('/api/sold-facets').then(r=>r.json())]).then(([,sf])=>{
+  $('#m-sold').textContent = num(sf.total);
+  load();
+});
 </script>
 </body>
 </html>

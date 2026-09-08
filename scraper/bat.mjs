@@ -21,7 +21,22 @@ const EXTRACT=()=>[...document.querySelectorAll('.listing-card')].map(card=>{
   const href=card.tagName==='A' ? card.getAttribute('href')
            : (card.querySelector('a[href*="/listing/"]')||{}).href;
   if(!title||!href) return null;
-  return { title, price:+m[1].replace(/,/g,''), date:m[2], url:String(href).split('?')[0] };
+  // Card thumbnails are lazy-loaded: src is often a 1px placeholder while the
+  // real asset sits in data-src or the srcset. Take the widest srcset candidate
+  // when present, since BaT serves several sizes and the default is the smallest.
+  const img=card.querySelector('img');
+  let image=null;
+  if(img){
+    const set=img.getAttribute('srcset')||img.getAttribute('data-srcset')||'';
+    if(set){
+      const best=set.split(',').map(s=>s.trim().split(/\s+/))
+        .map(([u,w])=>({u,w:parseInt(w)||0})).sort((a,b)=>b.w-a.w)[0];
+      if(best) image=best.u;
+    }
+    if(!image) image=img.getAttribute('data-src')||img.getAttribute('src')||null;
+    if(image&&/^data:/.test(image)) image=null;          // placeholder, not a photo
+  }
+  return { title, price:+m[1].replace(/,/g,''), date:m[2], url:String(href).split('?')[0], image };
 }).filter(Boolean);
 
 const b=await chromium.launch({args:['--disable-blink-features=AutomationControlled']});
@@ -48,6 +63,6 @@ for(const [line,path] of PATHS){
 }
 await b.close();
 const seen=new Set(); const final=out.filter(r=>seen.has(r.url)?false:(seen.add(r.url),true));
-fs.writeFileSync('/workspaces/three.ws/scratch/scraper/bat-sold.json',JSON.stringify(final,null,1));
+fs.writeFileSync(new URL('bat-sold.json', import.meta.url).pathname,JSON.stringify(final,null,1));
 console.log('\nunique sold records:',final.length);
 console.log('distinct prices overall:',new Set(final.map(r=>r.price)).size);

@@ -76,6 +76,17 @@ for (const c of listings) {
   }
 }
 
+// Recover mileage from BaT title conventions ("48k-Mile", "3,500-Mile"). Only a
+// minority of sold records carry a miles field, and a comps median with no
+// mileage context is a half-truth, so surface how much of the sample has one.
+for (const s of sold) {
+  if (s.miles) continue;
+  const k = (s.title || '').match(/([\d,]+)k-Mile/i);
+  const m = (s.title || '').match(/([\d,]+)-Mile/i);
+  if (k) s.miles = Math.round(parseFloat(k[1].replace(/,/g, '')) * 1000);
+  else if (m) s.miles = +m[1].replace(/,/g, '');
+}
+
 // Sold comps by model. This is the differentiator: AutoTempest shows asks only.
 const soldByModel = new Map();
 for (const s of sold) {
@@ -175,6 +186,61 @@ function search(q) {
   };
 }
 
+// Browse the auction archive directly. The comps panel answers "what is this car
+// worth"; this answers "show me every sale", which is the BringATrailer half of
+// the product and is a different question with different filters.
+function soldSearch(q) {
+  let r = sold.filter(s => s.price > 0);
+  if (q.model)    r = r.filter(s => (s.line || '').toLowerCase() === q.model.toLowerCase());
+  if (q.minYear)  r = r.filter(s => s.year && s.year >= +q.minYear);
+  if (q.maxYear)  r = r.filter(s => s.year && s.year <= +q.maxYear);
+  if (q.minPrice) r = r.filter(s => s.price >= +q.minPrice);
+  if (q.maxPrice) r = r.filter(s => s.price <= +q.maxPrice);
+  if (q.maxMiles) r = r.filter(s => s.miles && s.miles <= +q.maxMiles);
+  if (q.text) {
+    const x = q.text.toLowerCase();
+    r = r.filter(s => (s.title || '').toLowerCase().includes(x));
+  }
+
+  // Dates arrive as MM/DD/YYYY, which sorts wrong as a string. Key on YYYY-MM.
+  const monthOf = s => { const [mm, , yy] = (s.date || '').split('/'); return yy && mm ? `${yy}-${mm.padStart(2, '0')}` : null; };
+  const buckets = new Map();
+  for (const s of r) {
+    const k = monthOf(s); if (!k) continue;
+    if (!buckets.has(k)) buckets.set(k, []);
+    buckets.get(k).push(s.price);
+  }
+  const trend = [...buckets.entries()].sort((a, b) => a[0].localeCompare(b[0]))
+    .map(([month, ps]) => ({ month, n: ps.length, median: median(ps) }));
+
+  const sort = q.sort || 'date';
+  r = [...r].sort((a, b) => sort === 'price' ? a.price - b.price
+                          : sort === 'priceDesc' ? b.price - a.price
+                          : sort === 'miles' ? (a.miles || Infinity) - (b.miles || Infinity)
+                          : sort === 'year' ? (b.year || 0) - (a.year || 0)
+                          : new Date(b.date) - new Date(a.date));
+
+  const prices = r.map(s => s.price);
+  const withMiles = r.filter(s => s.miles).length;
+  return {
+    total: r.length,
+    median: median(prices),
+    low: prices.length ? Math.min(...prices) : 0,
+    high: prices.length ? Math.max(...prices) : 0,
+    // 68% of the archive has no mileage. Stating the coverage keeps the median
+    // honest rather than implying it is mileage-adjusted.
+    milesCoverage: r.length ? Math.round((withMiles / r.length) * 100) : 0,
+    trend,
+    results: r.slice(0, +(q.limit || 60)),
+  };
+}
+
+function soldFacets() {
+  const lines = {};
+  for (const s of sold) lines[s.line] = (lines[s.line] || 0) + 1;
+  return { lines, total: sold.length };
+}
+
 function facets() {
   const makes = {}, models = {}, sources = {};
   for (const c of listings) {
@@ -198,6 +264,8 @@ http.createServer((req, res) => {
 
   if (u.pathname === '/api/search')  return send(200, search(Object.fromEntries(u.searchParams)));
   if (u.pathname === '/api/facets')  return send(200, facets());
+  if (u.pathname === '/api/sold')    return send(200, soldSearch(Object.fromEntries(u.searchParams)));
+  if (u.pathname === '/api/sold-facets') return send(200, soldFacets());
   if (u.pathname === '/api/comps')   return send(200, compsFor(u.searchParams.get('model') || '', +u.searchParams.get('year') || null) || {});
 
   const file = u.pathname === '/' ? '/index.html' : u.pathname;
