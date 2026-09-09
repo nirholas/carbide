@@ -52,6 +52,23 @@ export function prepare(listings, sold) {
     else if (host) c.src = host;          // never surface a raw sitecode to a user
   }
 
+  // 348 rows arrived with make "Other" while naming a model that identifies the
+  // marque outright (Macan, 911, Taycan), which put a sixth of the Porsches
+  // outside the Porsche facet. Every model in this corpus maps to exactly one
+  // real make, so fill the gaps from that consensus rather than a hardcoded
+  // table: a new marque self-heals as soon as one row of it is labelled.
+  const makeByModel = new Map();
+  for (const c of listings) {
+    if (!c.make || c.make === 'Other') continue;
+    if (!makeByModel.has(c.model)) makeByModel.set(c.model, new Set());
+    makeByModel.get(c.model).add(c.make);
+  }
+  for (const c of listings) {
+    if (c.make && c.make !== 'Other') continue;
+    const seen = makeByModel.get(c.model);
+    if (seen && seen.size === 1) c.make = [...seen][0];   // ambiguous stays "Other"
+  }
+
   // Median asking price per (model, year-bucket) so a car is scored against its
   // own cohort rather than against the whole market.
   const cohortKey = c => `${c.model}|${Math.floor((c.year || 0) / 2) * 2}`;
