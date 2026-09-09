@@ -230,10 +230,20 @@ look like impossibly good deals and are not. They are labelled and excludable.
 exposes either as a filter or a reliable field. The salvage flag is a price-based
 heuristic, not a title check, and it is named *Verify title* for that reason.
 
-The honest path: **NMVTIS** is the authoritative federal title-brand database,
-about $10 per report through an approved provider. Run it only on shortlisted
-cars, pre-filtered by the free outlier flag. That yields a *verified clean title*
-badge nobody else has, at a cost that scales with intent rather than inventory.
+**Superseded in part, 2026-09-09.** The parallel aggregator solved most of this
+for free. Kelley Blue Book publishes a `vhrPreview` flag on every search record,
+which took that project from 1% owner coverage to 20% and 0% accident coverage to
+30%. Read those flags literally: `NO_ONE_OWNER` does not mean two owners, and
+`NO_SALVAGE_TITLE` does not mean a clean title, since rebuilt, flood and lemon
+are all still open. KBB is Cox Automotive, the same parent as Autotrader, so it
+serves much of the inventory Autotrader refuses through a door that is open.
+Wire KBB before anything in section 4.
+
+**NMVTIS** remains the answer for a genuine title guarantee: the authoritative
+federal title-brand database, about $10 per report through an approved provider.
+Run it only on shortlisted cars, pre-filtered by the free outlier flag and now by
+the KBB flags too. That yields a *verified clean title* badge nobody else has, at
+a cost that scales with intent rather than inventory.
 
 Free enrichment that needs no key and has shown no rate limit:
 
