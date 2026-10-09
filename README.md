@@ -171,3 +171,7 @@ Every one produced *plausible-looking wrong data*, which is far worse than an er
 
 Respect `robots.txt`, rate limit, prefer documented APIs, and keep the free NHTSA layer
 (vPIC decode, recalls with the `parkIt` flag) doing as much enrichment as it can.
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=nirholas/carbide&type=Date)](https://www.star-history.com/#nirholas/carbide&Date)
