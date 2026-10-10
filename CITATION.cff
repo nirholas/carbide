@@ -1,0 +1,9 @@
+cff-version: 1.2.0
+message: If you use this software, please cite it as below.
+title: "carbide"
+abstract: "Car listing aggregator across 10 sources, priced against real sold comps"
+repository-code: "https://github.com/nirholas/carbide"
+url: "https://three.ws"
+authors:
+  - name: three.ws
+    website: "https://three.ws"

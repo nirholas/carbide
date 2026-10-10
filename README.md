@@ -1,5 +1,10 @@
 # Carbide: a working car aggregator prototype
 
+<!-- three.ws:badges -->
+[![GitHub stars](https://img.shields.io/github/stars/nirholas/carbide?style=flat&logo=github)](https://github.com/nirholas/carbide/stargazers) [![Last commit](https://img.shields.io/github/last-commit/nirholas/carbide?style=flat)](https://github.com/nirholas/carbide/commits) [![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen?style=flat)](https://github.com/nirholas/carbide/pulls) [![AI agent friendly](https://img.shields.io/badge/AI%20agents-AGENTS.md%20%2B%20llms.txt-6d5dfc?style=flat)](https://github.com/nirholas/carbide/blob/HEAD/AGENTS.md)
+<!-- /three.ws:badges -->
+
+
 ```bash
 npm start          # dev server on http://localhost:4173
 npm run build      # static site into dist/, deployable anywhere
@@ -175,3 +180,26 @@ Respect `robots.txt`, rate limit, prefer documented APIs, and keep the free NHTS
 ## Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=nirholas/carbide&type=Date)](https://www.star-history.com/#nirholas/carbide&Date)
+
+<!-- three.ws:growth -->
+## Support the project
+
+If carbide saves you time, **[star it on GitHub](https://github.com/nirholas/carbide)**. Stars are how other developers and AI agents find the repositories worth trusting, and they cost you one click.
+
+Know someone who would use it? [Post on X](https://twitter.com/intent/tweet?text=carbide%3A%20Car%20listing%20aggregator%20across%2010%20sources%2C%20priced%20against%20real%20sold%20comps&url=https%3A%2F%2Fgithub.com%2Fnirholas%2Fcarbide) · [Share on Bluesky](https://bsky.app/intent/compose?text=carbide%3A%20Car%20listing%20aggregator%20across%2010%20sources%2C%20priced%20against%20real%20sold%20comps%20https%3A%2F%2Fgithub.com%2Fnirholas%2Fcarbide) · [Share on LinkedIn](https://www.linkedin.com/sharing/share-offsite/?url=https%3A%2F%2Fgithub.com%2Fnirholas%2Fcarbide) · [Submit to Hacker News](https://news.ycombinator.com/submitlink?u=https%3A%2F%2Fgithub.com%2Fnirholas%2Fcarbide&t=carbide%3A%20Car%20listing%20aggregator%20across%2010%20sources%2C%20priced%20against%20real%20sold%20comps) · [Share on Reddit](https://www.reddit.com/submit?url=https%3A%2F%2Fgithub.com%2Fnirholas%2Fcarbide&title=carbide%3A%20Car%20listing%20aggregator%20across%2010%20sources%2C%20priced%20against%20real%20sold%20comps)
+
+## Built for AI agents too
+
+Coding agents and LLM tooling can read this repo directly: [AGENTS.md](./AGENTS.md), [llms.txt](./llms.txt), [llms-full.txt](./llms-full.txt). Point an agent at `https://github.com/nirholas/carbide` and it has the context it needs.
+
+## More from the same author
+
+- [All repositories by nirholas](https://github.com/nirholas/nirholas#readme): the full catalog, grouped by topic
+- [three.ws](https://three.ws): the platform for 3D AI agents with Solana wallets, a skill marketplace and x402 payments
+- Questions or ideas: [open an issue](https://github.com/nirholas/carbide/issues) or [start a discussion](https://github.com/nirholas/carbide/discussions)
+
+## Contributors
+
+[![Contributors](https://contrib.rocks/image?repo=nirholas/carbide)](https://github.com/nirholas/carbide/graphs/contributors)
+
+<!-- /three.ws:growth -->

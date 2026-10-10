@@ -1,0 +1,26 @@
+# carbide
+
+> Car listing aggregator across 10 sources, priced against real sold comps
+
+carbide is an open-source repository by nirholas, part of the three.ws ecosystem.
+
+## Docs
+
+- [README](https://github.com/nirholas/carbide/blob/HEAD/README.md): install, usage and reference
+- [What this does that AutoTempest does not](https://github.com/nirholas/carbide/blob/HEAD/README.md#what-this-does-that-autotempest-does-not)
+- [Architecture](https://github.com/nirholas/carbide/blob/HEAD/README.md#architecture)
+- [The two halves](https://github.com/nirholas/carbide/blob/HEAD/README.md#the-two-halves)
+- [Getting more data in](https://github.com/nirholas/carbide/blob/HEAD/README.md#getting-more-data-in)
+- [Traps already paid for](https://github.com/nirholas/carbide/blob/HEAD/README.md#traps-already-paid-for)
+- [Next](https://github.com/nirholas/carbide/blob/HEAD/README.md#next)
+- [AGENTS.md](https://github.com/nirholas/carbide/blob/HEAD/AGENTS.md): guidance for coding agents
+- [Full text for LLMs](https://github.com/nirholas/carbide/blob/HEAD/llms-full.txt): the README inlined
+
+## Project
+
+- [Source](https://github.com/nirholas/carbide)
+- [Issues](https://github.com/nirholas/carbide/issues)
+- [Discussions](https://github.com/nirholas/carbide/discussions)
+- [Homepage](https://three.ws)
+- [three.ws](https://three.ws): the platform this is part of
+- [All repositories by nirholas](https://github.com/nirholas/nirholas#readme)
