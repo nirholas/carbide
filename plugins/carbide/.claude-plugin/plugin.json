@@ -1,0 +1,19 @@
+{
+  "name": "carbide",
+  "version": "0.1.0",
+  "description": "Car listing aggregator with sold-price comparables, queried through a local zero-dependency HTTP API.",
+  "author": {
+    "name": "nirholas"
+  },
+  "repository": "https://github.com/nirholas/carbide",
+  "homepage": "https://github.com/nirholas/carbide",
+  "license": "Apache-2.0",
+  "keywords": [
+    "cars",
+    "listings",
+    "aggregator",
+    "sold-comps",
+    "pricing",
+    "deal-rating"
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "name": "carbide",
+  "owner": {
+    "name": "nirholas"
+  },
+  "description": "Car listing aggregator with sold-price comparables, queried through a local zero-dependency HTTP API.",
+  "plugins": [
+    {
+      "name": "carbide",
+      "source": "./plugins/carbide",
+      "description": "Car listing aggregator with sold-price comparables, queried through a local zero-dependency HTTP API.",
+      "category": "data",
+      "tags": [
+        "cars",
+        "pricing",
+        "aggregator",
+        "comps"
+      ]
+    }
+  ]
+}
