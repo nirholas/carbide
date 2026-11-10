@@ -7,7 +7,7 @@
   },
   "repository": "https://github.com/nirholas/carbide",
   "homepage": "https://github.com/nirholas/carbide",
-  "license": "Apache-2.0",
+  "license": "MIT",
   "keywords": [
     "cars",
     "listings",
